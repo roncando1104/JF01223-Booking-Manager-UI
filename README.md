@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# JF01223-Booking-Manager-UI
-=======
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -9,7 +6,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
-### `cd booking-manager-ui`
 ### `npm start`
 
 Runs the app in the development mode.\
@@ -86,4 +82,3 @@ Happy hacking!
 `npm notice` Changelog: https://github.com/npm/cli/releases/tag/v10.2.3
 `npm notice` Run npm install -g npm@10.2.3 to update!
 `npm notice` 
->>>>>>> b69e88a (Initial push)

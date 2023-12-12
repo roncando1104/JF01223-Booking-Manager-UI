@@ -5,6 +5,7 @@ import {useState} from "react";
 import Layout from "./components/Layout";
 import Login from "./components/Login";
 import Home from "./components/Home";
+import CalendarBooking from "./components/CalendarBooking";
 import Profile from "./components/Profile";
 import { Routes, Route } from "react-router-dom";
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home firstName={firstName} userId={userId}/>} />
           <Route path="login" element={<Login setFirstName={setFirstName} setUserId={setUserId} setAccessToken={setAccessToken}/>} />
           <Route path="profile" element={<Profile firstName={firstName} userId={userId} accessToken={accessToken}/>} />
+          <Route path="calendar-booking" element={<CalendarBooking accessToken={accessToken}/>} />
         </Route>
       </Routes>
   );

@@ -23,7 +23,10 @@ const Home = ({firstName, userId}) => {
         <p>Hi! {firstName}</p>
         <p>Your Id is {userId}</p>
         <br />
-        <Link to="/profile">Go To Page 1</Link>
+        <Link to="/profile">Go To Profile</Link>
+        <br />
+        <br />
+        <Link to="/calendar-booking">Go To Booking Page</Link>
         <br />
         <div className="flexGrow">
           <button onClick={logout}>Sign Out</button>

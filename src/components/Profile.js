@@ -3,9 +3,8 @@ import {useContext} from "react";
 import AuthContext from "../context/AuthProvider";
 import axios from "../api/axios"
 
-const USER_URL = '/booking-api/v1/records/user/';
-//const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2pvMTAxNCIsImlhdCI6MTcwMTkxMjI5NSwiZXhwIjoxNzAxOTIzMDk1fQ.h9QIMLve1vhpEVjrNk69YU8lBMESdrKlkp5nyhmmvgg";
-const Profile = ({firstName, userId, accessToken}) => {
+  const USER_URL = '/booking-api/v1/records/user/';
+  const Profile = ({firstName, userId, accessToken}) => {
   const {setAuth} = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();

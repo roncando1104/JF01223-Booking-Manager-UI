@@ -5,6 +5,7 @@ import axios from "../api/axios"
 
   const USER_URL = '/booking-api/v1/records/user/';
   const Profile = ({firstName, userId, accessToken}) => {
+
   const {setAuth} = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();

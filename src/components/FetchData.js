@@ -2,24 +2,21 @@ import React, {useEffect, useState} from 'react'
 import axios from '../api/axios';
 const USERS_URL = '/booking-api/v1/records/user';
 
-function FetchData() {
-  const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2pvMTAxNCIsImlhdCI6MTcwMTY4ODc0OSwiZXhwIjoxNzAxNjk5NTQ5fQ.6gD7oX-GOEqb-fKfJagQ6QgidOSQwlEWzw15o7jwBTo';
+function FetchData({accessToken}) {
   const [data, setData] = useState([])
   useEffect(() => {
     axios.get(USERS_URL,
         {
                 headers: {
-                   Authorization: `Bearer ${token}`,
+                   Authorization: 'Bearer' + accessToken,
                   "content-type": "application/json",
                   'Accept': 'application/json',
                 }
         }
-        )
-    .then(res => {
+        ).then(res => {
       setData(res.data.info)
       console.log(res.data)
-  })
-    .catch(err => console.log(err));
+  }).catch(err => console.log(err));
   }, []);
 
   return (
@@ -40,9 +37,9 @@ function FetchData() {
               data.map((user, index) => {
                 return <tr key={index}>
                   <td className='center'>{user.id}</td>
-                  <td className='center'>{user.firstName + " " + user.lastName}</td>
+                  <td className='center'>{user.firstName + " " + user["lastName"]}</td>
                   <td className='center'>{user.address}</td>
-                  <td className='center'>{user.birthday}</td>
+                  <td className='center'>{user["birthday"]}</td>
                 </tr>
               })
             }

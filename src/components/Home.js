@@ -17,7 +17,7 @@ const Home = ({firstName, userId}) => {
   }
 
   return (
-      <div>
+      <div style={{width: "100%", height: "100%"}}>
         <h1>Home</h1>
         <br />
         <p>Hi! {firstName}</p>
@@ -27,14 +27,6 @@ const Home = ({firstName, userId}) => {
         <br />
         <br />
         <Link to="/calendar-booking">Go To Booking Page</Link>
-        <br />
-        <div className="flexGrow">
-          <button onClick={logout}>Sign Out</button>
-        </div>
-        <br />
-        <div className="flexGrow">
-          <button onClick={signin}>Login</button>
-        </div>
       </div>
   )
 }

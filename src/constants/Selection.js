@@ -10,4 +10,5 @@ export const activityOption = [
   { value: 'Dedication', label: 'Dedication'},
   { value: 'Elders Meeting', label: 'Elders Meeting'}, //should be converted to room1 (API expects this format as it will be used to find the column name
   { value: 'Ministry Meeting', label: 'Ministry Meeting'},
+  { value: 'Cluster Meeting', label: 'Cluster Meeting'},
 ];

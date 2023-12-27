@@ -9,9 +9,12 @@ import React, {useEffect, useRef, useState} from "react";
 import DatePicker from "react-datepicker";
 import axios from "../api/axios";
 import * as constants from "../constants/Constants"
-import { Modal, Button } from "react-bootstrap";
+import Modal  from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import * as selection from "../constants/Selection";
 import Select from 'react-select';
+import {useLocation, useNavigate} from "react-router-dom";
+import * as utility from "../util/utilities"
 
 //import {render} from "@testing-library/react";
 //import "react-big-calendar/lib/css/react-big-calendar.css"
@@ -29,7 +32,10 @@ const localizer = dateFnsLocalizer({
   locales
 });
 
-function CalendarBooking({accessToken}) {
+function CalendarBooking({accessToken, firstName, lastName}) {
+
+  const navigate = useNavigate();
+  const to = "/fallback-page";
 
   const errRef = useRef();
 
@@ -50,11 +56,11 @@ function CalendarBooking({accessToken}) {
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
   const [activity, setActivity] = useState("");
-  const [bookedBy, setBookedBy] = useState("");
+  //const [bookedBy, setBookedBy] = useState("");
   const [bookingID, setBookingID] = useState("");
   const [errorBookingMsg, setErrorBookingMsg] = useState("")
   //check if all fields are filled before enabling save button
-  const areAllFieldsFilled = (date !== "") && (room !== "") && (groupName !== "") && (groupCode !== "") && (activity !== "") && (bookedBy !== "");
+  const areAllFieldsFilled = (date !== "") && (room !== "") && (groupName !== "") && (groupCode !== "") && (activity !== "");
 
   //for Event Booking Modal. It will show the cancel confirmation modal
   const handleCancelConfirmation = () => {
@@ -62,7 +68,6 @@ function CalendarBooking({accessToken}) {
   }
   //this will show the booking modal
   const handleShow = () => {
-    setDate(format(new Date(), 'yyyy-MM-dd'))
     setShow(true)
   };
   //this will close the cancel and confirmation modal
@@ -86,10 +91,10 @@ function CalendarBooking({accessToken}) {
       groupName: groupName,
       groupCode: groupCode,
       activity: activity.value,
-      bookedBy: bookedBy
+      bookedBy: firstName + " " + lastName
     }
 
-    try{
+    try {
       const response = await axios.post(constants.ADD_RESERVATION_URL, data,
           {
             headers: {
@@ -102,18 +107,12 @@ function CalendarBooking({accessToken}) {
       const getResponseInfo = response.data.info;
       setBookingID(getResponseInfo.id);
       console.log("response", response)
-    }catch (err) {
+    } catch (err) {
       console.log(err)
       if (!err?.response) {
         setErrorBookingMsg('No Server Response');
         setBookingFailed(true);
-      } else if (err.response?.status === 415) {
-        setErrorBookingMsg(err.response.data.message);
-        setBookingFailed(true);
-      } else if (err.response?.status === 401) {
-        setErrorBookingMsg(err.response.data.message);
-        setBookingFailed(true);
-      } else if (err.response?.status === 403) {
+      } else if (err.response?.status === 415 || 401 || 403) {
         setErrorBookingMsg(err.response.data.message);
         setBookingFailed(true);
       }
@@ -124,7 +123,7 @@ function CalendarBooking({accessToken}) {
     setGroupName('')
     setGroupCode('')
     setActivity('')
-    setBookedBy('')
+    //setBookedBy('')
 
     setShow(false)
     setConfirm(false)
@@ -136,7 +135,7 @@ function CalendarBooking({accessToken}) {
     setGroupName('')
     setGroupCode('')
     setActivity('')
-    setBookedBy('')
+    //setBookedBy('')
 
     setCancelBooking(false)
     setShow(false)
@@ -169,14 +168,14 @@ function CalendarBooking({accessToken}) {
     return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   };
 
-function formatDate(date) {
-  const options = {day: '2-digit', month: 'short', year: 'numeric'};
-  const formattedDate = new Date(date).toLocaleDateString('en-US', options);
-  const [month, day, year] = formattedDate.split(' ');
-  const monthName = month.toProperCase();
-
-  return `${monthName} ${day} ${year}`;
-}
+// function formatDate(date) {
+//   const options = {day: '2-digit', month: 'short', year: 'numeric'};
+//   const formattedDate = new Date(date).toLocaleDateString('en-US', options);
+//   const [month, day, year] = formattedDate.split(' ');
+//   const monthName = month.toProperCase();
+//
+//   return `${monthName} ${day} ${year}`;
+// }
 
   function getRoomName(room){
     if (room === 'room1') {
@@ -230,26 +229,36 @@ function formatDate(date) {
   }, [date]); //added date to avoid infinite loop and unending execution of axios get request
 
   useEffect(() => {
-   axios.get(constants.AVAILABILITY_URL,
-      {
-        headers: {
-          'content-type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + accessToken,
-        }
-      }).then(res => {
-        const info = res.data.info;
-        //console.log(info)
-        setEvents(info.map(eventInfo => ({
-            title: "SOW Room 1: " + eventInfo["sowRoom1"] +
-                   "\nSOW Room 2: " + eventInfo["sowRoom2"] +
-                   "\n5th Room 1: " + eventInfo["room1"] +
-                   "\n5th Room 2: " + eventInfo["room2"],
-            allDay: true,
-            start: eventInfo["availableDate"],
-            end: eventInfo["availableDate"]
-        })))
-  }).catch(err => console.log(err));
+
+    axios.get(constants.AVAILABILITY_URL,
+        {
+          headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + accessToken,
+          }
+        }).then(res => {
+      const info = res.data.info;
+      //console.log(info)
+      setEvents(info.map(eventInfo => ({
+        title: "SOW Room 1: " + eventInfo["sowRoom1"] +
+            "\nSOW Room 2: " + eventInfo["sowRoom2"] +
+            "\n5th Room 1: " + eventInfo["room1"] +
+            "\n5th Room 2: " + eventInfo["room2"],
+        allDay: true,
+        start: eventInfo["availableDate"],
+        end: eventInfo["availableDate"]
+      })))
+    }).catch(err => {
+      console.log(err)
+      if (!err?.response) {
+        setErrMsg('No Server Response');
+      } else if (err.response?.status === 403) {
+        navigate(to, {replace: true})
+        console.log("403", err)
+
+      }
+    });
   }, []);
 
     return (
@@ -268,7 +277,7 @@ function formatDate(date) {
           </div>
           <div id="container">
             <p>Summary of Reservation(s) for Date: {date === ''
-                ? 'NO DATE SELECTED' : formatDate(date)}</p>
+                ? 'NO DATE SELECTED' : utility.formatDate(date)}</p>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"}
                aria-live="assertive">{errMsg}</p>
           </div>
@@ -278,7 +287,7 @@ function formatDate(date) {
                     info["room"])}</p>
                 <p style={{margin : 0, paddingTop:0}}>Booked By: {info["bookedBy"]}</p>
                 <p style={{margin : 0, paddingTop:0}}>Group: {info["groupName"].toProperCase()}</p>
-                <p style={{margin : 0, paddingTop:0}}>Date of Booking: {formatDate(info["bookingDate"])}</p>
+                <p style={{margin : 0, paddingTop:0}}>Date of Booking: {utility.formatDate(info["bookingDate"])}</p>
                 <p style={{margin : 0, paddingTop:0}}>Activity: {info["activity"].toProperCase()}</p>
                 <p style={{margin : 0, paddingTop:0}}>Status: {info.status.replace(/_/g, ' ')}</p>
                 <br/>
@@ -288,27 +297,31 @@ function formatDate(date) {
           <button onClick={handleShow}>New Event</button>
           {/*implement here the booking*/}
           <div>
-            <Modal show={show} size={"lg"}>
-            <Modal.Header>
-              <Modal.Title>EVENT DETAILS</Modal.Title>
-              <Button type={"button"} class="btn-close" onClick={handleCancelConfirmation}>x</Button>
+            <Modal show={show} size={"lg"} onHide={handleCancelConfirmation}>
+            <Modal.Header style={{backgroundColor: "lightgray", height: "3rem"}}>
+              <Modal.Title style={{marginLeft: "1rem"}}>EVENT DETAILS</Modal.Title>
+              <div>
+                <button style={{borderWidth: "0rem", backgroundColor: "lightgray", marginBottom: "1rem"}}
+                        onClick={handleCancelConfirmation}>X</button>
+              </div>
             </Modal.Header>
               <Modal.Body>
                 {/*Payload Field -> eventDate*/}
-                <h5>Select Date:</h5>
-                <div>
+                <h5>EVENT DATE</h5>
+                <div style={{width: "100%"}}>
                   <DatePicker
                       dateFormat="yyyy-MM-dd"
                       placeholderText={"Event Date"}
-                      style={{marginRight: "10px", outline: "none"}}
-                      selected={new Date(date)}
+                      className="calendar-booking-event"
+                      selected={date}
                       onChange={(d) => setDate(d)}
                       minDate={new Date()}
+                      required
                   />
                 </div>
                 <div style={{maxWidth: "15rem"}}>
                   {/*Payload Field -> room*/}
-                  <h5 style={{marginTop: "8px"}}>Select Room:</h5>
+                  <h5 style={{marginTop: "8px"}}>ROOM</h5>
                   <Select
                       theme={(theme) => ({
                         ...theme,
@@ -329,27 +342,34 @@ function formatDate(date) {
                       options={selection.roomOption}
                       onChange={(roomType) => setRoom(roomType)}
                       value={room}
+                      required
                   />
                 </div>
                 <div>
                   {/*Payload Field -> groupName*/}
-                  <h5 style={{marginTop: "8px"}}>Group Name:</h5>
-                  <input type={"text"} placeholder={"Group Name"}
-                         style={{width: "40%", marginRight: "10px", outline: "none"}}
+                  <h5 style={{marginTop: "8px"}}>GROUP NAME</h5>
+                  <input className="calendar-booking-event"
+                      type="text"
+                         autoComplete="off"
+                         placeholder="Group Name"
+                         required
+                         style={{fontSize: "18px"}}
                          value={groupName}
                          onChange={(group) => setGroupName(group.target.value)}/>
                 </div>
                 <div>
                   {/*Payload Field -> groupCode*/}
-                  <h5 style={{marginTop: "8px"}}>Group Code:</h5>
-                  <input type={"text"} placeholder={"Group Code"}
-                         style={{width: "40%", marginRight: "10px", outline: "none"}}
+                  <h5 style={{marginTop: "8px"}}>GROUP CODE</h5>
+                  <input className="calendar-booking-event"
+                      type={"text"} placeholder={"Group Code"}
+                          autoComplete="off"
+                         required
                          value={groupCode}
                          onChange={(code) => setGroupCode(code.target.value)}/>
                 </div>
                 <div style={{maxWidth: "15rem"}}>
                   {/*Payload Field -> activity*/}
-                  <h5 style={{marginTop: "8px"}}>Select Activity:</h5>
+                  <h5 style={{marginTop: "8px"}}>ACTIVITY</h5>
                   <Select
                       theme={(theme) => ({
                         ...theme,
@@ -370,24 +390,29 @@ function formatDate(date) {
                       options={selection.activityOption}
                       onChange={(str) => setActivity(str)}
                       value={activity}
+                      required
                   />
                 </div>
-                <div>
-                  {/*Payload Field -> bookedBy*/}
+                {/*<div>
+                  Payload Field -> bookedBy
+                  TODO: This can be change by passing the first and last name from App.js so the one logged in will be the one booking an event - DONE!!!
                   <h5 style={{marginTop: "8px"}}>Booked By:</h5>
                   <input type={"text"} placeholder={"Client Name"}
                          style={{width: "40%", marginRight: "10px", outline: "none"}}
                          value={bookedBy}
                          onChange={(clientName) => setBookedBy(clientName.target.value)}/>
-                </div>
+                </div>*/}
               </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleCancelConfirmation}>Cancel
-                  Booking</Button>
-
+              <Modal.Footer style={{backgroundColor: "lightgray"}}>
                 <Button variant="secondary"
+                        onClick={handleCancelConfirmation}
+                        style={{width: "150px", borderRadius: "8px", backgroundColor: "rgb(47,79,79)", color: "whitesmoke", fontSize: "15px"}}
+                        >Cancel Booking</Button>
+
+                <Button variant="primary"
                         onClick={handleConfirmAction}
                         disabled={!areAllFieldsFilled}
+                        style={{width: "150px", borderRadius: "8px", backgroundColor: "rgb(112,128,144)", color: "whitesmoke", fontSize: "15px"}}
                         >Save</Button>
               </Modal.Footer>
             </Modal>

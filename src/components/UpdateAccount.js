@@ -9,6 +9,7 @@ import {eye} from 'react-icons-kit/feather/eye'
 import axios from "../api/axios";
 import * as constants from "../constants/Constants";
 import format from "date-fns/format";
+import {el} from "date-fns/locale";
 
 const UpdateAccount = ({userData, accessToken}) => {
 
@@ -45,6 +46,8 @@ const UpdateAccount = ({userData, accessToken}) => {
   const [iconNewPassword, setIconNewPassword] = useState(eyeOff);
   const [typeConfirmPassword, setTypeConfirmPassword] = useState('password');
   const [iconConfirmPassword, setIconConfirmPassword] = useState(eyeOff);
+
+  const [userNameAvailability, setUserNameAvailability] = useState(true);
 
   useEffect(() => {
     userRef.current?.focus();
@@ -83,6 +86,53 @@ const UpdateAccount = ({userData, accessToken}) => {
     }
   }
 
+  const handleUsernameAvailabilityValidation = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.get(constants.GET_USERNAME_URL + userName + '/' + userData.id,
+          {
+            headers: {
+              'content-type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + accessToken
+            }
+          });
+
+      const status = response.data.status;
+      const responseMsg = response.data.message;
+
+      if (status === 200) {
+        document.getElementById("username-availability").innerHTML = responseMsg;
+        document.getElementById("username-availability").style.color = 'green';
+        setUserNameAvailability(true);
+      } else if (status === 201) {
+        document.getElementById("username-availability").innerHTML = responseMsg;
+        document.getElementById("username-availability").style.color = 'green';
+        setUserNameAvailability(true);
+      } else if (status === 226) {
+        document.getElementById("username-availability").innerHTML = responseMsg;
+        document.getElementById("username-availability").style.color = 'red';
+        setUserNameAvailability(false);
+      } else {
+        setUserNameAvailability(false);
+        document.getElementById("username-availability").style.color = 'red';
+        toast.error("There was an error in username");
+      }
+      //console.log("username", response);
+    } catch (err) {
+      console.log(err)
+      if (!err?.response) {
+        toast.error("Internal Server Error")
+      } else if (err.response?.status === 403) {
+        toast.error("Update Forbidden")
+      } else if (err.response?.status === 415 || 401) {
+        toast.error("Header Error or Data not found")
+      }
+    }
+
+  }
+
   const handleUpdateAccount = async (e) => {
     e.preventDefault();
     const oldPassword = document.getElementById("old-password").value;
@@ -118,47 +168,51 @@ const UpdateAccount = ({userData, accessToken}) => {
       } else if (newPassword !== confirmPassword) {
         toast.error("Password mismatch")
       } else {
-        try {
-          const response = await axios.put(constants.UPDATE_URL + id, data,
-          {
-            headers : {
-              'content-type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ' + accessToken
+
+        if (userNameAvailability === false) {
+          toast.error("Invalid Username");
+        } else if (userNameAvailability === true) {
+          try {
+            const response = await axios.put(constants.UPDATE_URL + id, data,
+                {
+                  headers : {
+                    'content-type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                  }
+                });
+
+            setFirstName('');
+            setMiddleName('');
+            setLastName('');
+            setEmailAdd('');
+            setContactNum('');
+            setAddress('');
+            setBirthday('');
+            setRole('');
+            setStatus('');
+            setClusterGrp('');
+            setClusterCode('');
+            setSimbahay('');
+            setSimbahayCode('');
+            setUserName('');
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            //navigate to success page
+
+            const getResponseInfo = response.data.info;
+            console.log("response", getResponseInfo)
+            toast.success("successful update")
+          } catch (err) {
+            console.log(err)
+            if (!err?.response) {
+              toast.error("Internal Server Error")
+            } else if (err.response?.status === 403) {
+              toast.error("Update Forbidden")
+            } else if (err.response?.status === 415 || 401) {
+              toast.error("Header Error or Data not found")
             }
-          });
-
-          setFirstName('');
-          setMiddleName('');
-          setLastName('');
-          setEmailAdd('');
-          setContactNum('');
-          setAddress('');
-          setBirthday('');
-          setRole('');
-          setStatus('');
-          setClusterGrp('');
-          setClusterCode('');
-          setSimbahay('');
-          setSimbahayCode('');
-          setUserName('');
-          setOldPassword('');
-          setNewPassword('');
-          setConfirmPassword('');
-          //navigate to success page
-
-          const getResponseInfo = response.data.info;
-          console.log("response", getResponseInfo)
-          toast.success("successful update")
-        } catch (err) {
-          console.log(err)
-          if (!err?.response) {
-            //do something
-            toast.error("Internal Server Error")
-          } else if (err.response?.status === 403) {
-            toast.error("Update Forbidden")
-          } else if (err.response?.status === 415 || 401) {
-            toast.error("Header Error or Data not found")
           }
         }
       }
@@ -219,7 +273,7 @@ const UpdateAccount = ({userData, accessToken}) => {
           </div>
           <div style={{
             backgroundColor: "rgb(245,245,245)",
-            height: "50rem",
+            height: "52rem",
             width: "60rem",
             marginTop: "-99.5rem",
             marginLeft: "8rem",
@@ -432,9 +486,13 @@ const UpdateAccount = ({userData, accessToken}) => {
                          autoComplete="off"
                          onChange={(e) => setUserName(e.target.value)}
                          value={userName}
+                         onKeyUp={handleUsernameAvailabilityValidation}
                          placeholder="username"
                          required
                   />
+                  <div className="username-availability-div">
+                    <span id="username-availability"></span>
+                  </div>
                 </div>
                 <div className="old-password-update-acct-div">
                   <div id="old-password-info">
@@ -478,7 +536,7 @@ const UpdateAccount = ({userData, accessToken}) => {
                 {/*</div>*/}
               </div>
 
-              <div className="credential-label">
+              <div className="credential-label-new-password">
                 <label htmlFor="new-password">NEW PASSWORD</label>
                 <label htmlFor="confirm-password">CONFIRM PASSWORD</label>
               </div>

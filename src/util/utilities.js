@@ -10,7 +10,7 @@ export function formatDate(date) {
 }
 
 export function formatRole(role) {
-  return role === 'AE' ? 'Apprentice Elder' :  role.replace('_', ' ').toProperCase()
+  return role === 'AE' ? 'Apprentice Elder' : role === '' || role === undefined ? '' :  role.replace('_', ' ').toProperCase()
 }
 
 export function formatPhoneNumber(str) {

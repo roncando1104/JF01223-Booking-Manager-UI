@@ -901,6 +901,16 @@ img {
   /*background-color: red; test*/
 }
 
+.username-availability-div {
+  width: 10rem;
+  margin-left: 80px;
+  text-align: left;
+}
+
+#username-availability {
+  font-size: 14px;
+}
+
 #user {
   float: left;
   width: 85%;
@@ -1014,6 +1024,16 @@ img {
 .credential-label label{
   float: left;
   margin-top: 20px;
+  margin-left: 73px;
+  font-size: 15px;
+  width: 15rem; /* Four equal-width links. If you have two links, use 50%, and 33.33% for three links, etc.. */
+  text-align: left;
+  color: #000;
+}
+
+.credential-label-new-password label{
+  float: left;
+  margin-top: 30px;
   margin-left: 73px;
   font-size: 15px;
   width: 15rem; /* Four equal-width links. If you have two links, use 50%, and 33.33% for three links, etc.. */
